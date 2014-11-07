@@ -9,11 +9,13 @@ namespace NPlant
 {
     public class ClassDiagram
     {
+        internal static readonly MemberVisibilityDictionary MemberVisibility = new MemberVisibilityDictionary();
+
         private readonly TypeMetaModelSet _types = new TypeMetaModelSet();
         private string _name;
         private string _title;
         private readonly KeyedList<AssemblyDescriptor> _assemblyDescriptors = new KeyedList<AssemblyDescriptor>();
-        private readonly KeyedList<ClassDescriptor> _classDescriptors = new KeyedList<ClassDescriptor>();
+        private readonly KeyedList<RootClassDescriptor> _rootClassDescriptors = new KeyedList<RootClassDescriptor>();
         private readonly ClassDiagramOptions _generationOptions;
         private ClassDiagramLegend _legend;
         private readonly List<ClassDiagramNote> _notes = new List<ClassDiagramNote>();
@@ -40,12 +42,17 @@ namespace NPlant
 
         internal TypeMetaModelSet Types { get { return _types; } }
 
-        protected RootClassDescriptor<T> AddClass<T>()
+        protected AddedClassDescriptor<T> Class<T>()
         {
-            var classDescriptor = new RootClassDescriptor<T>();
+            return AddClass<T>();
+        }
+
+        protected AddedClassDescriptor<T> AddClass<T>()
+        {
+            var classDescriptor = new AddedClassDescriptor<T>();
 
             this.AddClass(classDescriptor);
-            _classDescriptors.Add(classDescriptor);
+            _rootClassDescriptors.Add(classDescriptor);
 
             return classDescriptor;
         }
@@ -55,7 +62,7 @@ namespace NPlant
             var classDescriptor = new RootEnumDescriptor(typeof(T));
 
             this.AddClass(classDescriptor);
-            _classDescriptors.Add(classDescriptor);
+            _rootClassDescriptors.Add(classDescriptor);
 
             return classDescriptor;
         }
@@ -84,23 +91,15 @@ namespace NPlant
             return this;
         }
 
-        internal void AddReflectedClass(int level, Type type)
+        internal void AddClass(RootClassDescriptor descriptor, bool addAssembly = true)
         {
-            var descriptor = type.GetReflected();
-
-            descriptor.SetLevel(level);
-            this.AddClass(descriptor);
-        }
-
-        public void AddClass(ClassDescriptor descriptor, bool addAssembly = true)
-        {
-            _classDescriptors.Add(descriptor.CheckForNullArg("descriptor"));
+            _rootClassDescriptors.Add(descriptor.CheckForNullArg("descriptor"));
 
             if(addAssembly)
                 AddAssembly(descriptor.ReflectedType.Assembly);
         }
 
-        public KeyedList<ClassDescriptor> RootClasses { get { return _classDescriptors; } }
+        internal IEnumerable<RootClassDescriptor> RootClasses { get { return _rootClassDescriptors.InnerList; } }
 
         internal IDiagramFormatter CreateFormatter(ClassDiagramVisitorContext context)
         {
@@ -154,7 +153,7 @@ namespace NPlant
             return note;
         }
 
-        internal string GetClassColor(ClassDescriptor @class)
+        internal string GetClassColor(RootClassDescriptor @class)
         {
             return null;
         }

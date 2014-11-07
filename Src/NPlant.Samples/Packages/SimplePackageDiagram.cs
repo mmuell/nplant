@@ -8,13 +8,13 @@ namespace NPlant.Samples.Packages
         {
             AddClass<Foo>();
 
-
+            AddPackage("Foo").IncludeAll();
             AddPackage("Package A")
-                .IncludeClassesWhere(descriptor => descriptor.ReflectedType == typeof(Foo))
-                .IncludeClassesWhere(descriptor => descriptor.ReflectedType == typeof(Bar));
+                .IncludeWhere(descriptor => descriptor.ReflectedType == typeof(Foo))
+                .IncludeWhere(descriptor => descriptor.ReflectedType == typeof(Bar));
 
             AddPackage("Package B")
-                .IncludeClassesWhere(descriptor => descriptor.ReflectedType == typeof (Baz));
+                .IncludeWhere(descriptor => descriptor.ReflectedType == typeof (Baz));
 
         }
     }

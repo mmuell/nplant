@@ -19,6 +19,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{8BB4078C-E
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPlant.UI", "Src\NPlant.UI\NPlant.UI.csproj", "{B75BA5EE-848E-40A3-A428-F553EA3D37A8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{185C9747-AA64-43DC-B098-7213BF51367B} = {185C9747-AA64-43DC-B098-7213BF51367B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

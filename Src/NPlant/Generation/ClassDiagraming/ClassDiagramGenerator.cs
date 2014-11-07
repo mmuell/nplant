@@ -16,7 +16,7 @@ namespace NPlant.Generation.ClassDiagraming
             using (new ClassDiagramGeneration(Definition))
             {
                 // initialize all of the classes there were explicitly added via that diagram API
-                foreach (var rootClass in Definition.RootClasses.InnerList)
+                foreach (var rootClass in Definition.RootClasses)
                 {
                     rootClass.Visit();
                     OnRootClassVisited(rootClass);
@@ -29,7 +29,7 @@ namespace NPlant.Generation.ClassDiagraming
             }
         }
 
-        protected virtual void OnRootClassVisited(ClassDescriptor rootClass)
+        protected virtual void OnRootClassVisited(RootClassDescriptor rootClass)
         {
         }
 

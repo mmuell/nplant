@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,6 +16,14 @@ namespace NPlant.Core
         public int Count
         {
             get { return _innerList.Count; }
+        }
+
+        public void ForEach(Action<T> action)
+        {
+            foreach (T t in _innerList)
+            {
+                action(t);
+            }
         }
 
         public void Add(T item)

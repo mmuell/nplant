@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using NPlant.MetaModel.ClassDiagraming;
 using NUnit.Framework;
 
-namespace NPlant.Tests.ClassDiagrams
+namespace NPlant.Tests.Diagrams.ClassDiagrams
 {
     [TestFixture]
     public class AggregationScenarios

@@ -9,9 +9,9 @@ namespace NPlant
     {
         private readonly ClassDiagram _diagram;
         private readonly string _name;
-        private readonly List<Func<ClassDescriptor, bool>> _matcher = new List<Func<ClassDescriptor, bool>>();
+        private readonly List<Func<RootClassDescriptor, bool>> _matcher = new List<Func<RootClassDescriptor, bool>>();
 
-        public string Name { get { return _name; } }
+        internal string Name { get { return _name; } }
 
         internal ClassDiagramPackage(string name, ClassDiagram diagram)
         {
@@ -19,7 +19,7 @@ namespace NPlant
             _name = name;
         }
 
-        public ClassDiagramPackage IncludeClassesWhere(Func<ClassDescriptor, bool> filter)
+        public ClassDiagramPackage IncludeWhere(Func<RootClassDescriptor, bool> filter)
         {
             _matcher.Add(filter);
 
@@ -28,14 +28,14 @@ namespace NPlant
 
         public ClassDiagram IncludeAll()
         {
-            IncludeClassesWhere(descriptor => true);
+            IncludeWhere(descriptor => true);
 
             return _diagram;
         }
 
         public ClassDiagram Diagram { get { return _diagram; } }
 
-        public bool IsMatch(ClassDescriptor classDescriptor)
+        internal bool IsMatch(RootClassDescriptor classDescriptor)
         {
             return _matcher.Any(matcher => matcher(classDescriptor));
         }

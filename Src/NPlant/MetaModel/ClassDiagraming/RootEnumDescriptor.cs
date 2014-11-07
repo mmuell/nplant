@@ -4,7 +4,7 @@ using NPlant.Generation.ClassDiagraming;
 
 namespace NPlant.MetaModel.ClassDiagraming
 {
-    public class RootEnumDescriptor : ClassDescriptor
+    public class RootEnumDescriptor : RootClassDescriptor
     {
         public RootEnumDescriptor(Type reflectedType) : base(reflectedType)
         {
@@ -19,7 +19,7 @@ namespace NPlant.MetaModel.ClassDiagraming
             // don't load any member for enums
         }
 
-        public override IDescriptorWriter GetWriter(ClassDiagram diagram)
+        internal override IDescriptorWriter GetWriter(ClassDiagram diagram)
         {
             return new EnumWriter(this.ReflectedType);
         }

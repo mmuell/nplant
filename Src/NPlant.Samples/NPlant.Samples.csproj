@@ -43,11 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\SimpleEnumDiagram.cs" />
+    <Compile Include="ClassDisplayOptions\MemberLevelCustomization.cs" />
+    <Compile Include="ClassDisplayOptions\SquashInheritance.cs" />
     <Compile Include="Factories\SimpleDiagramFactory.cs" />
     <Compile Include="Inheritance\SimpleInheritanceDiagram.cs" />
-    <Compile Include="CircularReferences\SimpleRecursiveDiagram.cs" />
     <Compile Include="Legends\SimpleLegendDiagram.cs" />
+    <Compile Include="Model.cs" />
     <Compile Include="Notes\SimpleNotesDiagram.cs" />
     <Compile Include="Packages\SimplePackageDiagram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

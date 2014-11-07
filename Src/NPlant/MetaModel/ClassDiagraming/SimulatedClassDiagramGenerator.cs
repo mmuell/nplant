@@ -6,19 +6,19 @@ namespace NPlant.MetaModel.ClassDiagraming
     public class SimulatedClassDiagramGenerator : ClassDiagramGenerator
     {
         private readonly ClassDiagram _definition;
-        private readonly KeyedList<ClassDescriptor> _classes = new KeyedList<ClassDescriptor>();
+        private readonly KeyedList<RootClassDescriptor> _classes = new KeyedList<RootClassDescriptor>();
 
         public SimulatedClassDiagramGenerator(ClassDiagram diagram) : base(diagram)
         {
             _definition = diagram;
         }
 
-        protected override void OnRootClassVisited(ClassDescriptor rootClass)
+        protected override void OnRootClassVisited(RootClassDescriptor rootClass)
         {
             _classes.Add(rootClass);
         }
 
-        public KeyedList<ClassDescriptor> Classes
+        public KeyedList<RootClassDescriptor> Classes
         {
             get { return _classes; }
         }

@@ -58,9 +58,6 @@ namespace NPlant.Generation
                     process.StandardInput.Write(diagramText);
                     process.StandardInput.Close();
 
-                    if (process.StandardOutput == null)
-                        throw new NPlantException("While invoking plant uml, the standard output was empty. Error out: {0}".FormatWith(process.StandardError.ReadToEnd()));
-
                     return Image.FromStream(process.StandardOutput.BaseStream);
                 }
                 
@@ -70,18 +67,16 @@ namespace NPlant.Generation
             }
             catch (Exception ex)
             {
-                Logger("Unhandled exception occurred while invoking plantuml: " + ex);
-
                 if (ex.IsDontMessWithMeException())
                     throw;
 
-                string message = CreateException(ex);
+                Logger("Unhandled exception occurred while invoking plantuml: " + ex);
 
-                throw new NPlantException(message, ex);
+                throw CreateException(ex);
             }
         }
 
-        private string CreateException(Exception exception)
+        private NPlantException CreateException(Exception exception)
         {
             Win32Exception win32 = exception as Win32Exception;
 
@@ -91,14 +86,14 @@ namespace NPlant.Generation
                 {
                     if (Path.IsPathRooted(_javaPath))
                     {
-                        return "It appears the path to your local JRE installation is specified incorrectly in Options -> Settings.  '{0}' could not be found.".FormatWith(_javaPath);
+                        return new JavaNotFoundException("It appears the path to your local JRE installation is specified incorrectly in Options -> Settings.  '{0}' could not be found.".FormatWith(_javaPath));
                     }
 
-                    return "It appears the exact location of your JRE installation is not specified in your Options -> Settings.  This tool assumes java.exe is in your system PATH if not otherwise specified in your settings.  Either add java.exe to your path, or explicitly specify where we can find java.exe.  If you don't have the Java JRE installed, use the Help menu to go get it.";
+                    return new JavaNotFoundException("It appears the exact location of your JRE installation is not specified in your Options -> Settings.  This tool assumes java.exe is in your system PATH if not otherwise specified in your settings.  Either add java.exe to your path, or explicitly specify where we can find java.exe.  If you don't have the Java JRE installed, use the Help menu to go get it.");
                 }
             }
 
-            StringBuilder buffer = new StringBuilder();
+            var buffer = new StringBuilder();
             buffer.AppendLine("Failed to invoke plant uml.  See the inner exception for more details.  Messages:");
                 
             Exception ex = exception;
@@ -109,7 +104,7 @@ namespace NPlant.Generation
                 ex = ex.InnerException;
             }
 
-            return buffer.ToString();
+            return new NPlantException(buffer.ToString());
         }
     }
 }

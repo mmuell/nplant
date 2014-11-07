@@ -21,7 +21,7 @@ namespace NPlant
             return this;
         }
 
-        public ClassDiagramNote ConnectedToClass<T>()
+        public ClassDiagramNote ConnectedTo<T>()
         {
             if (!_connectedTypes.Contains(typeof(T)))
                 _connectedTypes.Add(typeof (T));

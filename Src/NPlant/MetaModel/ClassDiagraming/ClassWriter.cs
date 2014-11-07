@@ -8,9 +8,9 @@ namespace NPlant.MetaModel.ClassDiagraming
     public class ClassWriter : IDescriptorWriter
     {
         private readonly ClassDiagram _diagram;
-        private readonly ClassDescriptor _class;
+        private readonly RootClassDescriptor _class;
 
-        public ClassWriter(ClassDiagram diagram, ClassDescriptor @class)
+        public ClassWriter(ClassDiagram diagram, RootClassDescriptor @class)
         {
             _diagram = diagram;
             this._class = @class;
@@ -52,9 +52,9 @@ namespace NPlant.MetaModel.ClassDiagraming
             return buffer.ToString();
 
         }
-        private bool IsBaseClassVisible(ClassDescriptor @class, ClassDiagramVisitorContext context)
+        private bool IsBaseClassVisible(RootClassDescriptor @class, ClassDiagramVisitorContext context)
         {
-            if (_diagram.RootClasses.InnerList.Any(x => x.ReflectedType == @class.ReflectedType.BaseType))
+            if (_diagram.RootClasses.Any(x => x.ReflectedType == @class.ReflectedType.BaseType))
                 return true;
 
             if (context.VisitedRelatedClasses.Any(x => x.ReflectedType == @class.ReflectedType.BaseType))
@@ -67,13 +67,16 @@ namespace NPlant.MetaModel.ClassDiagraming
         {
             foreach (var member in members)
             {
-                if (!member.MetaModel.Hidden && (member.MetaModel.IsPrimitive || member.TreatAsPrimitive))
+                if (member.MetaModel.IsPrimitive || member.TreatAsPrimitive)
                 {
-                    string accessModifier = member.AccessModifier.Notation;
-                    string typeName = member.MetaModel.Name;
-                    string memberName = member.Name;
+                    if (!member.MetaModel.Hidden && ClassDiagram.MemberVisibility[_class, member.Name])
+                    {
+                        string accessModifier = member.AccessModifier.Notation;
+                        string typeName = member.MetaModel.Name;
+                        string memberName = member.Name;
 
-                    buffer.AppendLine("    {0}{1} {2}".FormatWith(accessModifier, typeName, memberName));
+                        buffer.AppendLine("    {0}{1} {2}".FormatWith(accessModifier, typeName, memberName));
+                    }
                 }
             }
         }

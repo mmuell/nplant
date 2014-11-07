@@ -83,6 +83,6 @@ namespace NPlant.Generation.ClassDiagraming
     {
         AllMembers,
         PublicMembersOnly,
-        SystemServiceModelMember
+        SystemServiceModelMembers
     }
 }

@@ -10,7 +10,7 @@ namespace NPlant.MetaModel.ClassDiagraming
             this.RenderInheritance = false;
         }
 
-        public override IDescriptorWriter GetWriter(ClassDiagram diagram)
+        internal override IDescriptorWriter GetWriter(ClassDiagram diagram)
         {
             return new EnumWriter(this.ReflectedType);
         }

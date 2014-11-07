@@ -67,7 +67,7 @@ namespace NPlant.Generation.ClassDiagraming
 
         private void WriteRootClasses(Dictionary<string, List<string>> packageMap, List<string> unpackaged)
         {
-            foreach (var rootClass in _diagram.RootClasses.InnerList)
+            foreach (var rootClass in _diagram.RootClasses)
             {
                 string classDefinition = WriteClassDefinition(rootClass);
 
@@ -75,7 +75,7 @@ namespace NPlant.Generation.ClassDiagraming
             }
         }
 
-        private void AssignToPackage(ClassDescriptor rootClass, Dictionary<string, List<string>> packageMap,
+        private void AssignToPackage(RootClassDescriptor rootClass, Dictionary<string, List<string>> packageMap,
                                      string classDefinition, List<string> unpackaged)
         {
             foreach (var package in _diagram.Packages)
@@ -143,7 +143,7 @@ namespace NPlant.Generation.ClassDiagraming
 
                     foreach (var connection in note.ConnectedClasses)
                     {
-                        ClassDescriptor descriptor = connection.GetReflected();
+                        RootClassDescriptor descriptor = connection.GetReflected();
 
                         _buffer.AppendLine("{0} .. {1}".FormatWith(descriptor.Name, key));
                     }
@@ -196,7 +196,7 @@ namespace NPlant.Generation.ClassDiagraming
                                                            suffix));
         }
 
-        private string WriteClassDefinition(ClassDescriptor @class)
+        private string WriteClassDefinition(RootClassDescriptor @class)
         {
             IDescriptorWriter writer = @class.GetWriter(_diagram);
             return writer.Write(_context);

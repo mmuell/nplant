@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace NPlant.Tests.Diagrams.ClassDiagrams
 {
     [TestFixture]
-    public class EdgetScenarios
+    public class EdgeScenarios
     {
         [Test]
         public void Circular_References_Dont_Create_Multiple_Classes()

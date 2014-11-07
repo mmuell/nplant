@@ -8,9 +8,9 @@ namespace NPlant.MetaModel.ClassDiagraming
     public class ClassMemberDescriptor : IKeyedItem
     {
         private readonly TypeMetaModel _metaModel;
-        private readonly ClassDescriptor _descriptor;
+        private readonly RootClassDescriptor _descriptor;
 
-        public ClassMemberDescriptor(ClassDescriptor descriptor, MemberInfo member)
+        public ClassMemberDescriptor(RootClassDescriptor descriptor, MemberInfo member)
         {
             var property = member as PropertyInfo;
             this.AccessModifier = AccessModifier.Public;
@@ -51,7 +51,7 @@ namespace NPlant.MetaModel.ClassDiagraming
         
         public string Key { get; private set; }
 
-        public bool IsHidden { get { return !_descriptor.GetMemberVisibility(this.Name); } }
+        public bool IsHidden { get { return !ClassDiagram.MemberVisibility[_descriptor, this.Name]; } }
 
         public TypeMetaModel MetaModel { get { return _metaModel; } }
 

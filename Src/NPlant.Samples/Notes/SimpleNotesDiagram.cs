@@ -11,8 +11,8 @@
                     .AddLine("with another line");
             this.AddNote("this is connected note")
                     .AddLine("with another line")
-                    .ConnectedToClass<Foo>()
-                    .ConnectedToClass<Bar>();
+                    .ConnectedTo<Foo>()
+                    .ConnectedTo<Bar>();
         }
     }
     public class Foo { }

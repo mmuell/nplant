@@ -12,17 +12,17 @@ namespace NPlant.Tests.Diagraming
     {
         [TestCase(typeof(PublicMembersOnly), ClassDiagramScanModes.PublicMembersOnly, new string[] { "Foo" })]
         [TestCase(typeof(AllMembers), ClassDiagramScanModes.AllMembers, new[] { "Foo", "Moo", "Bar", "Baz" })]
-        [TestCase(typeof(DataContractSubject), ClassDiagramScanModes.SystemServiceModelMember, new[] { "Foo", "Baz" })]
-        [TestCase(typeof(MessageContractSubject), ClassDiagramScanModes.SystemServiceModelMember, new[] { "Foo", "Baz" })]
-        [TestCase(typeof(FieldDataContractSubject), ClassDiagramScanModes.SystemServiceModelMember, new[] { "Foo", "Baz" })]
-        [TestCase(typeof(FieldMessageContractSubject), ClassDiagramScanModes.SystemServiceModelMember, new[] { "Foo", "Baz" })]
-        [TestCase(typeof(FieldPropertyHybridDataContractSubject), ClassDiagramScanModes.SystemServiceModelMember, new[] { "Foo", "Baz" })]
-        [TestCase(typeof(FieldPropertyHybridMessageContractSubject), ClassDiagramScanModes.SystemServiceModelMember, new[] { "Foo", "Baz" })]
+        [TestCase(typeof(DataContractSubject), ClassDiagramScanModes.SystemServiceModelMembers, new[] { "Foo", "Baz" })]
+        [TestCase(typeof(MessageContractSubject), ClassDiagramScanModes.SystemServiceModelMembers, new[] { "Foo", "Baz" })]
+        [TestCase(typeof(FieldDataContractSubject), ClassDiagramScanModes.SystemServiceModelMembers, new[] { "Foo", "Baz" })]
+        [TestCase(typeof(FieldMessageContractSubject), ClassDiagramScanModes.SystemServiceModelMembers, new[] { "Foo", "Baz" })]
+        [TestCase(typeof(FieldPropertyHybridDataContractSubject), ClassDiagramScanModes.SystemServiceModelMembers, new[] { "Foo", "Baz" })]
+        [TestCase(typeof(FieldPropertyHybridMessageContractSubject), ClassDiagramScanModes.SystemServiceModelMembers, new[] { "Foo", "Baz" })]
         public void Scan_Suite(Type subjectType, ClassDiagramScanModes scanMode, string[] expectations)
         {
             using (new ClassDiagramGeneration(new StubClassDiagramVisitorContext(scanMode)))
             {
-                ClassDescriptor descriptor = new ReflectedClassDescriptor(subjectType);
+                RootClassDescriptor descriptor = new ReflectedClassDescriptor(subjectType);
                 descriptor.Visit();
                 Assert.That(descriptor.Members.Count, Is.EqualTo(expectations.Length));
 

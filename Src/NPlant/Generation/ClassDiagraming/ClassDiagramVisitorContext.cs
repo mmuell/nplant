@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using NPlant.Core;
 using NPlant.MetaModel.ClassDiagraming;
@@ -8,9 +9,9 @@ namespace NPlant.Generation.ClassDiagraming
 {
     public class ClassDiagramVisitorContext
     {
-        private readonly Queue<ClassDescriptor> _unvisitedRelatedClasses = new Queue<ClassDescriptor>();
+        private readonly Queue<RootClassDescriptor> _unvisitedRelatedClasses = new Queue<RootClassDescriptor>();
         private readonly List<ClassDiagramRelationship> _relationships = new List<ClassDiagramRelationship>();
-        private readonly List<ClassDescriptor> _visitedRelatedClasses = new List<ClassDescriptor>();
+        private readonly List<RootClassDescriptor> _visitedRelatedClasses = new List<RootClassDescriptor>();
 
         public static ClassDiagramVisitorContext Current { get; set; }
 
@@ -41,7 +42,7 @@ namespace NPlant.Generation.ClassDiagraming
 
         public BindingFlags ShowMethodsBindingFlags { get; protected set; }
 
-        public void AddRelated(ClassDescriptor parent, ClassDescriptor child, ClassDiagramRelationshipTypes relationshipType, int level, string name = null)
+        public void AddRelated(RootClassDescriptor parent, RootClassDescriptor child, ClassDiagramRelationshipTypes relationshipType, int level, string name = null)
         {
             if (! AlreadyRegistered(child))
                 _unvisitedRelatedClasses.Enqueue(child);
@@ -52,7 +53,7 @@ namespace NPlant.Generation.ClassDiagraming
                 _relationships.Add(relationship);
         }
 
-        private bool AlreadyRegistered(ClassDescriptor child)
+        private bool AlreadyRegistered(RootClassDescriptor child)
         {
             if(_visitedRelatedClasses.Contains(child))
                 return true;
@@ -60,13 +61,13 @@ namespace NPlant.Generation.ClassDiagraming
             if (_unvisitedRelatedClasses.Contains(child))
                 return true;
             
-            if (this.Diagram.RootClasses.InnerList.Contains(child))
+            if (this.Diagram.RootClasses.Contains(child))
                 return true;
 
             return false;
         }
 
-        public IEnumerable<ClassDescriptor> VisitedRelatedClasses { get { return _visitedRelatedClasses; } }
+        public IEnumerable<RootClassDescriptor> VisitedRelatedClasses { get { return _visitedRelatedClasses; } }
 
         public IEnumerable<ClassDiagramRelationship> Relationships { get { return _relationships; } }
 

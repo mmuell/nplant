@@ -1,74 +1,180 @@
 ﻿using System;
-using System.Linq.Expressions;
-using System.Reflection;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using System.ServiceModel;
 using NPlant.Core;
+using NPlant.Generation.ClassDiagraming;
 
 namespace NPlant.MetaModel.ClassDiagraming
 {
-    public class RootClassDescriptor<T> : ClassDescriptor
+    public abstract class RootClassDescriptor : IKeyedItem
     {
-        public RootClassDescriptor() : base(typeof(T))
-        {
-        }
+        private readonly KeyedList<ClassMemberDescriptor> _members = new KeyedList<ClassMemberDescriptor>();
+        private readonly KeyedList<ClassMethodDescriptor> _methods = new KeyedList<ClassMethodDescriptor>();
 
-        public RootClassDescriptor<T> Named(string name)
-        {
-            this.Name = name;
-            return this;
-        }
-
-
-        public RootClassDescriptor<T> ShowInheritors()
+        protected RootClassDescriptor(Type reflectedType)
         {
             this.RenderInheritance = true;
-            return this;
+            this.ReflectedType = reflectedType;
+            this.Name = this.ReflectedType.GetFriendlyGenericName();
         }
 
-        public RootClassDescriptor<T> HideInheritors()
+        public void Visit()
         {
-            this.RenderInheritance = false;
-            return this;
-        }
+            var context = ClassDiagramVisitorContext.Current;
+            this.MetaModel = context.GetTypeMetaModel(this.ReflectedType);
 
-        public RootClassDescriptor<T> HideMember<TMember>(Expression<Func<T, TMember>> expression)
-        {
-            var member = ReflectOn<T>.ForMember(expression);
-            MemberVisibility[member.Name] = false;
+            if(context.ShowMembers)
+                LoadMembers(context);
+            
+            if(context.ShowMethods)
+                LoadMethods(context);
 
-            return this;
-        }
+            var showInheritance = ShouldShowInheritance(context);
 
-        public ForMemberDescriptor<T> ForMember<TMember>(Expression<Func<T, TMember>> expression)
-        {
-            return new ForMemberDescriptor<T>(this, ReflectOn<T>.ForMember(expression));
-        }
-
-        public class ForMemberDescriptor<TMember>
-        {
-            private readonly ClassDescriptor _descriptor;
-            private readonly MemberInfo _member;
-
-            public ForMemberDescriptor(ClassDescriptor descriptor, MemberInfo member)
+            if (!this.MetaModel.Hidden)
             {
-                _descriptor = descriptor;
-                _member = member;
+                foreach (ClassMemberDescriptor member in this.Members.InnerList)
+                {
+                    if (this.MetaModel.TreatAllMembersAsPrimitives)
+                        member.TreatAsPrimitive = true;
+
+                    TypeMetaModel metaModel = member.MetaModel;
+
+                    if (!metaModel.Hidden && !member.TreatAsPrimitive)
+                    {
+                        // if not showing inheritance then show all members
+                        // otherwise, only show member that aren't inherited
+                        if (!showInheritance || !member.IsInherited)
+                        {
+                            if (metaModel.IsComplexType && ClassDiagram.MemberVisibility[this, member.Key])
+                            {
+                                var nextLevel = this.Level + 1;
+
+                                if (member.MemberType.IsEnumerable())
+                                {
+                                    var enumeratorType = member.MemberType.GetEnumeratorType();
+                                    var enumeratorTypeMetaModel = context.GetTypeMetaModel(enumeratorType);
+
+                                    if (enumeratorTypeMetaModel.IsComplexType)
+                                    {
+                                        context.AddRelated(this, enumeratorType.GetReflected(), ClassDiagramRelationshipTypes.HasMany, nextLevel, member.Name);
+                                    }
+                                }
+                                else
+                                {
+                                    context.AddRelated(this, member.MemberType.GetReflected(), ClassDiagramRelationshipTypes.HasA, nextLevel, member.Name);
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
-            public ForMemberDescriptor<TMember> Hide()
+            if (showInheritance)
             {
-                _descriptor.MemberVisibility[_member.Name] = false;
-                return this;
-            }
-
-            public ForMemberDescriptor<TMember> CustomerDiagram<TForMember>(Expression<Func<TMember, TForMember>> expression)
-            {
-                return new ForMemberDescriptor<TMember>(_descriptor, ReflectOn<TMember>.ForMember(expression));
+                context.AddRelated(this, this.ReflectedType.BaseType.GetReflected(), ClassDiagramRelationshipTypes.Base, this.Level - 1);
             }
         }
 
-        public override IDescriptorWriter GetWriter(ClassDiagram diagram)
+        private void LoadMethods(ClassDiagramVisitorContext context)
         {
-            return new ClassWriter(diagram, this);
+            var methods = this.ReflectedType.GetMethods(context.ShowMethodsBindingFlags);
+
+            foreach (var method in methods)
+            {
+                if(!method.IsProperty()) // weed up the compiler generated methods for properties
+                    _methods.Add(new ClassMethodDescriptor(method));
+            }
         }
+
+        private bool ShouldShowInheritance(ClassDiagramVisitorContext context)
+        {
+            bool showInheritance = this.RenderInheritance && this.ReflectedType.BaseType != null;
+
+            if (showInheritance)
+            {
+                var baseTypeMetaModel = context.GetTypeMetaModel(this.ReflectedType.BaseType);
+
+                showInheritance = !baseTypeMetaModel.HideAsBaseClass && !baseTypeMetaModel.Hidden;
+            }
+
+            return showInheritance;
+        }
+
+        protected virtual void LoadMembers(ClassDiagramVisitorContext context)
+        {
+            switch (context.ScanMode)
+            {
+                case ClassDiagramScanModes.SystemServiceModelMembers:
+                    _members.AddRange(this.ReflectedType.GetFields()
+                                                        .Where(x => x.HasAttribute<DataMemberAttribute>() || x.HasAttribute<MessageBodyMemberAttribute>())
+                                                        .Where(x => !x.IsDefined(typeof(CompilerGeneratedAttribute), false))
+                                                        .Select(field => new ClassMemberDescriptor(this, field))
+                                     );
+                    _members.AddRange(this.ReflectedType.GetProperties()
+                                                        .Where(x => x.HasAttribute<DataMemberAttribute>() || x.HasAttribute<MessageBodyMemberAttribute>())
+                                                        .Where(x => !x.IsDefined(typeof(CompilerGeneratedAttribute), false))
+                                                        .Select(property => new ClassMemberDescriptor(this, property))
+                                     );
+                    break;
+                case ClassDiagramScanModes.AllMembers:
+                    _members.AddRange(this.ReflectedType.GetFields(context.ShowMembersBindingFlags)
+                                                        .Where(x => !x.IsDefined(typeof(CompilerGeneratedAttribute), false))
+                                                        .Select(field => new ClassMemberDescriptor(this, field))
+                                     );
+                    _members.AddRange(this.ReflectedType.GetProperties(context.ShowMembersBindingFlags)
+                                                        .Where(x => !x.IsDefined(typeof(CompilerGeneratedAttribute), false))
+                                                        .Select(property => new ClassMemberDescriptor(this, property))
+                                     );
+                    break;
+                default:
+                    _members.AddRange(this.ReflectedType.GetFields()
+                                                        .Where(x => !x.IsDefined(typeof(CompilerGeneratedAttribute), false))
+                                                        .Select(field => new ClassMemberDescriptor(this, field))
+                                     );
+                    _members.AddRange(this.ReflectedType.GetProperties()
+                                                        .Where(x => !x.IsDefined(typeof(CompilerGeneratedAttribute), false))
+                                                        .Select(property => new ClassMemberDescriptor(this, property))
+                                     );
+                    break;
+            }
+        }
+
+        string IKeyedItem.Key { get { return this.Name; } }
+
+        public string Name { get; protected set; }
+
+        public bool RenderInheritance { get; set; }
+
+        public Type ReflectedType { get; private set; }
+
+        public int Level { get; protected set; }
+
+        public KeyedList<ClassMemberDescriptor> Members { get { return _members; } }
+
+        public KeyedList<ClassMethodDescriptor> Methods { get { return _methods; } }
+
+        public TypeMetaModel MetaModel { get; private set; }
+
+        public string Color { get; private set; }
+
+        public override int GetHashCode()
+        {
+            return this.ReflectedType.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            RootClassDescriptor descriptor = obj as RootClassDescriptor;
+
+            if (descriptor == null)
+                return false;
+
+            return descriptor.ReflectedType == this.ReflectedType;
+        }
+
+        internal abstract IDescriptorWriter GetWriter(ClassDiagram diagram);
     }
 }

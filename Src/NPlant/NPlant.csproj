@@ -45,6 +45,7 @@
     <Compile Include="ClassDiagramNote.cs" />
     <Compile Include="ClassDiagramPackage.cs" />
     <Compile Include="Core\EnumJoiner.cs" />
+    <Compile Include="Core\JavaNotFoundException.cs" />
     <Compile Include="Generation\ClassDiagramFile.cs" />
     <Compile Include="Generation\ClassDiagraming\BufferedClassDiagramGenerator.cs" />
     <Compile Include="Generation\ClassDiagraming\ClassDiagramFormatter.cs" />
@@ -69,7 +70,8 @@
     <Compile Include="IDiagramFormatter.cs" />
     <Compile Include="IDiagramGenerator.cs" />
     <Compile Include="MetaModel\ClassDiagraming\AccessModifier.cs" />
-    <Compile Include="MetaModel\ClassDiagraming\ClassDescriptor.cs" />
+    <Compile Include="MetaModel\ClassDiagraming\MemberVisibilityDictionary.cs" />
+    <Compile Include="MetaModel\ClassDiagraming\RootClassDescriptor.cs" />
     <Compile Include="MetaModel\ClassDiagraming\AssemblyDescriptor.cs" />
     <Compile Include="MetaModel\ClassDiagraming\ClassDiagramRelationship.cs" />
     <Compile Include="MetaModel\ClassDiagraming\ClassMethodDescriptor.cs" />
@@ -77,7 +79,7 @@
     <Compile Include="MetaModel\ClassDiagraming\EnumWriter.cs" />
     <Compile Include="MetaModel\ClassDiagraming\IDescriptorWriter.cs" />
     <Compile Include="MetaModel\ClassDiagraming\ReflectedEnumDescriptor.cs" />
-    <Compile Include="MetaModel\ClassDiagraming\RootClassDescriptor.cs" />
+    <Compile Include="MetaModel\ClassDiagraming\AddedClassDescriptor.cs" />
     <Compile Include="MetaModel\ClassDiagraming\SimulatedClassDiagramGenerator.cs" />
     <Compile Include="MetaModel\ClassDiagraming\ClassMemberDescriptor.cs" />
     <Compile Include="Core\KeyedList.cs" />
